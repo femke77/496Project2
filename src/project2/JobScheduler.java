@@ -1,6 +1,8 @@
 package project2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class JobScheduler {
 
@@ -27,15 +29,13 @@ public class JobScheduler {
 
 	public Schedule bruteForceSolution() {
 		Schedule schedule = new Schedule();     
-		bFPermute(schedule, jobs);
+		bruteForcePermute(schedule, jobs);
 
 		return schedule;
 
 	}
 
-	private void bFPermute(Schedule schedule, Job[] jobs) {
-	
-
+	private void bruteForcePermute(Schedule schedule, Job[] jobs) {
 		bFPermuteHelper(schedule, jobs, 0);
 
 	}
@@ -43,10 +43,9 @@ public class JobScheduler {
 	private void bFPermuteHelper(Schedule schedule, Job[] jobs, int index) {
 		int time = 0;
 		int currentProfit = 0;
-		Job temp;
-		
+		Job temp;		
 
-		if (index >= jobs.length - 1) { // stop recursion, no permutations left
+		if (index >= jobs.length - 1) { // stop recursion
 
 			for (int i = 0; i < jobs.length; i++) { 
 				jobs[i].start = time;
@@ -69,7 +68,7 @@ public class JobScheduler {
 
 			}
 			
-			return;
+			
 		}
 		for (int k = index; k < jobs.length; k++) {
 			temp = jobs[index];
@@ -77,17 +76,153 @@ public class JobScheduler {
 			jobs[k] = temp;
 
 			bFPermuteHelper(schedule, jobs, index + 1);
-            
-			
+            			
 			temp = jobs[index];
 			jobs[index] = jobs[k];
 			jobs[k] = temp;
 
 		}
+	
+	}//end algorithm
+	
+    public Schedule makeScheduleEDF(){
+    	int time = 0;   	
+    	Schedule scheduleEDF = new Schedule();
+    	DeadlineComparator dc= new DeadlineComparator();
+    	
+    	Arrays.sort(jobs, dc);  //jobs array sorted by deadline
+    	for (int i = 0; i < jobs.length; i++){   //fill in start and finish times
+    		jobs[i].start = time;
+			jobs[i].finish = time = time + jobs[i].length;
+			
+    	}	
+    	for (int i = 0; i < jobs.length; i++){
+    		if (jobs[i].finish <= jobs[i].deadline){
+    			scheduleEDF.profit += jobs[i].profit;
+    		}
+    		else{  //do not add profit, move it to the end of the array and slide the others left
+    			Job temp = jobs[i];
+    			for (int j = i+1; j < jobs.length; j++){
+    				jobs[j-1]= jobs[j];
+    			}
+    			jobs[jobs.length-1]=temp;
+    		}
+    	}
+    	for (int i = 0; i < jobs.length; i++){   //move jobs array into the schedule arraylist. 
+    	    scheduleEDF.schedule.add(jobs[i]);
+    	}
+    	return scheduleEDF;
+    }
+    
+    public Schedule makeScheduleSJF(){
+    	int time=0;
+    	Schedule scheduleSJF = new Schedule();
+    	LengthComparator lc = new LengthComparator();
+    	Arrays.sort(jobs, lc);  //sort the job array by length in nondecreasing order
+    	for (int i = 0; i < jobs.length; i++){   //fill in start and finish times
+    		jobs[i].start = time;
+			jobs[i].finish = time = time + jobs[i].length;
+			
+    	}	
+    	for (int i = 0; i < jobs.length; i++){
+    		if (jobs[i].finish <= jobs[i].deadline){
+    			scheduleSJF.profit += jobs[i].profit;
+    		}
+    		else{  //do not add profit, move it to the end of the array and slide the others left
+    			Job temp = jobs[i];
+    			for (int j = i+1; j < jobs.length; j++){
+    				jobs[j-1]= jobs[j];
+    			}
+    			jobs[jobs.length-1]=temp;
+    		}
+    	}
+    	for (int i = 0; i < jobs.length; i++){   //move jobs array into the schedule arraylist. 
+    	    scheduleSJF.schedule.add(jobs[i]);
+    	}
+    	return scheduleSJF;
+    	
+    }
+    
+    public Schedule makeScheduleHPF(){
+    	int time=0;
+    	Schedule scheduleHPF = new Schedule();
+    	ProfitComparator pc = new ProfitComparator();
+    	Arrays.sort(jobs, pc);
+    	for (int i = 0; i < jobs.length; i++){   //fill in start and finish times
+    		jobs[i].start = time;
+			jobs[i].finish = time = time + jobs[i].length;
+			
+    	}	
+    	for (int i = 0; i < jobs.length; i++){
+    		if (jobs[i].finish <= jobs[i].deadline){
+    			scheduleHPF.profit += jobs[i].profit;
+    		}
+    		else{  //do not add profit, move it to the end of the array and slide the others left
+    			Job temp = jobs[i];
+    			for (int j = i+1; j < jobs.length; j++){
+    				jobs[j-1]= jobs[j];
+    			}
+    			jobs[jobs.length-1]=temp;
+    		}
+    	}
+    	for (int i = 0; i < jobs.length; i++){   //move jobs array into the schedule arraylist. 
+    	    scheduleHPF.schedule.add(jobs[i]);
+    	}
+    	
+    	return scheduleHPF;
+    }
+    
+    public Schedule newApproxSchedule(){
+    	Schedule mySchedule= new Schedule();
+    	
+    	
+    	return mySchedule;
+    }
+    
+    
+    //-----------------------------------------------------------------------------------------------------
+    class DeadlineComparator implements Comparator<Job>{ 
 
-	}
+        @Override
+        public int compare(Job arg0, Job arg1) {
+            if(arg0.deadline <= arg1.deadline){
+                return -1;
+            }else{
+                return 1;
+            }
+        }
+        
+    }
+    //--------------------------------------------------------------------------------------------------------
+    class LengthComparator implements Comparator<Job>{ 
 
-	public class Job {
+        @Override
+        public int compare(Job arg0, Job arg1) {
+            if(arg0.length <= arg1.length){
+                return -1;
+            }else{
+                return 1;
+            }
+        }
+        
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------
+    class ProfitComparator implements Comparator<Job>{ 
+
+        @Override
+        public int compare(Job arg0, Job arg1) {
+            if(arg0.profit<= arg1.profit){
+                return -1;
+            }else{
+                return 1;
+            }
+        }
+        
+    }
+    
+    //--------------------------------------------------------------------------------------------------------------
+	public class Job { 
 
 		int jobNumber, length, deadline, profit, start, finish;
 
@@ -102,10 +237,13 @@ public class JobScheduler {
 		}
 
 		public String toString() {
-			return "#" + jobNumber + ":(" + length + "," + deadline + "," + profit + "," + start + "," + finish + ")";
+			return "#" + jobNumber + ":(" + length + "," + deadline + "," + profit + "," 
+		    + start + "," + finish + ")";
 		}
 
 	}// end class Job
+	
+	//---------------------------------------------------------------------------------------------------------------
 
 	public class Schedule {
 
@@ -120,7 +258,7 @@ public class JobScheduler {
 		}
 
 		public void add(Job job) {
-
+           
 		}
 
 		public int getProfit() {
