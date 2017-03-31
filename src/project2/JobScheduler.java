@@ -45,17 +45,24 @@ public class JobScheduler {
 		int currentProfit = 0;
 		Job temp;
 
-		if (index >= jobs.length - 1) { // stop recursion
-
+		if (index >= jobs.length - 1) { //recursive base case
+			
 			for (int i = 0; i < jobs.length; i++) {
 				jobs[i].start = time;
 				time += jobs[i].length;
 				jobs[i].finish = time;
 				if (jobs[i].finish <= jobs[i].deadline) {
 					currentProfit += jobs[i].profit;
-				}
+				}				
 			}
-
+            
+			time=0;
+            for (int i = 0; i < schedule.schedule.size(); i++){
+            	schedule.schedule.get(i).start = time;
+            	time += schedule.schedule.get(i).length;
+            	schedule.schedule.get(i).finish = time;
+            }
+            
 			if (currentProfit >= maxProfit) {
 
 				schedule.profit = currentProfit;
@@ -63,10 +70,15 @@ public class JobScheduler {
 				if (!schedule.schedule.isEmpty()) { // clear the old schedule
 					schedule.schedule.removeAll(schedule.schedule);
 				}
+				
+		        time = 0;
+		        
 				for (int j = 0; j < jobs.length; j++) { // create new schedule
-					schedule.schedule.add(jobs[j]);
+				
+				    schedule.schedule.add(jobs[j]);
+				    
 				}
-
+				
 			}
 
 		}
@@ -74,16 +86,20 @@ public class JobScheduler {
 			temp = jobs[index];
 			jobs[index] = jobs[k];
 			jobs[k] = temp;
+		
 
 			bFPermuteHelper(schedule, jobs, index + 1);
 
 			temp = jobs[index];
 			jobs[index] = jobs[k];
 			jobs[k] = temp;
+			
+				
+			}
 
-		}
+		
 
-	}// end algorithm
+	}// end
 
 	public Schedule makeScheduleEDF() {
 
@@ -109,17 +125,16 @@ public class JobScheduler {
 			
 			
             //if a job is not meeting its deadline, move it to the end of the array, move remaining elements left 
-			//if a job continues to not meet its deadline, we have to swap again
+			//if a job continues to not meet its deadline after swap, we have to swap again until all combinations are tried
 			while (count >= 0 ^ (jobs[i].finish <= jobs[i].deadline) ) {
                 
 				Job temp = jobs[i];
 				for (int j = i + 1; j < jobs.length; j++) {
 					jobs[j - 1] = jobs[j];
 				}
-
 				jobs[jobs.length - 1] = temp;
                 
-				//redo all the start,finish times and check if the elements' moving caused previously failing
+				//re-do all the start,finish times and check if the elements' moving caused previously failing
 				//deadlines to now succeed. 
 				jobs[jobs.length - 1].finish = maxTime;
 				adjTime = maxTime;
@@ -257,26 +272,14 @@ public class JobScheduler {
 
 	public Schedule newApproxSchedule() {
 		Schedule mySchedule = new Schedule();
-
+        //fill in your schedule algo here
 		return mySchedule;
 	}
 
-	// -----------------------------------------------------------------------------------------------------
-	class DeadlineFinishComparator implements Comparator<Job> {
 
-		@Override
-		public int compare(Job arg0, Job arg1) {
-			if (arg0.finish <= arg1.deadline) {
-				return -1;
-			} else {
-				return 1;
-			}
-		}
-
-	}
 
 	// -----------------------------------------------------------------------------------------------------
-	class DeadlineComparator implements Comparator<Job> {
+	private class DeadlineComparator implements Comparator<Job> {
 
 		@Override
 		public int compare(Job arg0, Job arg1) {
@@ -290,7 +293,7 @@ public class JobScheduler {
 	}
 
 	// --------------------------------------------------------------------------------------------------------
-	class LengthComparator implements Comparator<Job> {
+	private class LengthComparator implements Comparator<Job> {
 
 		@Override
 		public int compare(Job arg0, Job arg1) {
@@ -304,7 +307,7 @@ public class JobScheduler {
 	}
 
 	// -----------------------------------------------------------------------------------------------------------
-	class ProfitComparator implements Comparator<Job> {
+	private class ProfitComparator implements Comparator<Job> {
 
 		@Override
 		public int compare(Job arg0, Job arg1) {
@@ -352,7 +355,7 @@ public class JobScheduler {
 		}
 
 		public void add(Job job) {
-
+            //using util.arraylist add(Element e)
 		}
 
 		public int getProfit() {
