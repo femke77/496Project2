@@ -6,9 +6,9 @@ public class Driver {
 
 	public static void main(String[] args) {
 
-		int[] length = { 4, 7, 3 };
-		int[] deadline = { 16, 9, 20 };
-		int[] profit = { 5, 20, 10 };
+		int[] length = { 7, 4, 2, 5 };
+		int[] deadline = { 7, 16, 8, 10 };
+		int[] profit = { 10, 9, 14, 13 };
 		JobScheduler js = new JobScheduler(length, deadline, profit);
 
 		System.out.println("Jobs to be scheduled");
