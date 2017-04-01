@@ -64,23 +64,20 @@ public class JobScheduler {
             }
             
 			if (currentProfit >= maxProfit) {
-
 				schedule.profit = currentProfit;
 				maxProfit = currentProfit;
 				if (!schedule.schedule.isEmpty()) { // clear the old schedule
 					schedule.schedule.removeAll(schedule.schedule);
 				}
 				
-		        time = 0;
-		        
-				for (int j = 0; j < jobs.length; j++) { // create new schedule
-				
+		        time = 0;		        
+				for (int j = 0; j < jobs.length; j++) { // create new schedule				
 				    schedule.schedule.add(jobs[j]);
 				    
 				}
 				
 			}
-
+            return;
 		}
 		for (int k = index; k < jobs.length; k++) {
 			temp = jobs[index];
@@ -271,12 +268,75 @@ public class JobScheduler {
 	}
 
 	public Schedule newApproxSchedule() {
-		Schedule mySchedule = new Schedule();
-        //fill in your schedule algo here
-		return mySchedule;
+		int adjTime = 0;
+		int maxTime =0;
+		int time =0;
+		int count =0;
+		Schedule newSchedule = new Schedule();
+	    LambdaComparator lambda = new LambdaComparator();
+	    for (int i = 0; i < jobs.length; i++){
+	    	jobs[i].lambda = jobs[i].profit/jobs[i].length;
+	    }
+	    Arrays.sort(jobs, lambda);
+	    for (int i = 0; i < jobs.length; i++) { // fill in start and finish times
+			jobs[i].start = time;
+			time += jobs[i].length;
+			jobs[i].finish = time;
+
+		}
+		maxTime = jobs[jobs.length - 1].finish;
+
+		for (int i = 0; i < jobs.length; i++) {
+			count = jobs.length - i;
+            //if a job is not meeting its deadline, move it to the end of the array, move remaining elements left 
+			while (count >= 0 ^ (jobs[i].finish <= jobs[i].deadline)) {
+
+				Job temp = jobs[i];
+				for (int j = i + 1; j < jobs.length; j++) {
+					jobs[j - 1] = jobs[j];
+				}
+
+				jobs[jobs.length - 1] = temp;
+
+				//redo all the start,finish times and check if the elements' moving caused previously failing
+				//deadlines to now succeed. 
+				jobs[jobs.length - 1].finish = maxTime;
+				adjTime = maxTime;
+
+				for (int k = jobs.length - 1; k > 0; k--) {
+					jobs[k].start = adjTime - jobs[k].length;
+					jobs[k - 1].finish = jobs[k].start;
+					adjTime -= jobs[k].length;
+				}
+				jobs[0].start = 0;
+				count--;
+			}
+		}
+        //the jobs array is now settled, transfer jobs and profit to the final arraylist schedule
+		for (int i = 0; i < jobs.length; i++) { 
+
+			newSchedule.schedule.add(jobs[i]);
+			if (jobs[i].finish <= jobs[i].deadline)
+				newSchedule.profit += jobs[i].profit;
+		}
+
+		return newSchedule;
+		
 	}
 
+	// -----------------------------------------------------------------------------------------------------
+	private class LambdaComparator implements Comparator<Job> {
 
+		@Override
+		public int compare(Job arg0, Job arg1) {
+			if (arg0.lambda <= arg1.lambda) {
+				return 1;
+			} else {
+				return -1;
+			}
+		}
+
+	}
 
 	// -----------------------------------------------------------------------------------------------------
 	private class DeadlineComparator implements Comparator<Job> {
@@ -324,6 +384,7 @@ public class JobScheduler {
 	public class Job {
 
 		int jobNumber, length, deadline, profit, start, finish;
+		double lambda;
 
 		public Job(int jn, int len, int d, int p) {
 
@@ -333,6 +394,7 @@ public class JobScheduler {
 			profit = p;
 			start = -1;
 			finish = -1;
+			lambda = -1;
 		}
 
 		public String toString() {

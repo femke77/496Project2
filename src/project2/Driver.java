@@ -6,9 +6,9 @@ public class Driver {
 
 	public static void main(String[] args) {
 
-		int[] length = { 7, 4, 2, 5 };
-		int[] deadline = { 7, 16, 8, 10 };
-		int[] profit = { 10, 9, 14, 13 };
+		int[] length = { 7, 4, 2, 5,9,10 ,14};
+		int[] deadline = { 7, 16, 8, 10,20,30,25 };
+		int[] profit = { 10, 9, 14, 13 ,2,1,18};
 		JobScheduler js = new JobScheduler(length, deadline, profit);
 
 		System.out.println("Jobs to be scheduled");
@@ -35,7 +35,7 @@ public class Driver {
 		System.out.println(HPFSchedule);
 
 		// ------------------------------
-		System.out.println("\nYour own creative solution");
+		System.out.println("\nYour own creative solution ");
 		Schedule NASSchedule = js.newApproxSchedule();
 		System.out.println(NASSchedule);
 	}
